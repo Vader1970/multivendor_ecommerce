@@ -5,6 +5,9 @@ import { Inter, Barlow } from "next/font/google";
 //Global CSS
 import "./globals.css";
 
+//Light/Dark Theme Provider
+import { ThemeProvider } from "next-themes";
+
 // Fonts
 const interFont = Inter({ subsets: ["latin"] });
 const barlowFont = Barlow({
@@ -26,8 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${interFont.className} ${barlowFont.variable}`} suppressHydrationWarning>
-        {children}
+      <body className={`${interFont.className} ${barlowFont.variable}`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
