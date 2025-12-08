@@ -1,9 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isProtectedRoute = createRouteMatcher(["/"]);
-
 export default clerkMiddleware(async (auth, req, next) => {
-    const protectedRoutes = createRouteMatcher(["/"]);
+    const protectedRoutes = createRouteMatcher(["/dashboard/(.*)"]);
     if (protectedRoutes(req)) await auth.protect();
 });
 
@@ -14,4 +12,4 @@ export const config = {
         // Always run for API routes
         '/(api|trpc)(.*)',
     ],
-};
+}
