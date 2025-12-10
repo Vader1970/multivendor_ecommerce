@@ -11,6 +11,11 @@ import { ThemeProvider } from "next-themes";
 //Clerk Provider
 import { ClerkProvider } from "@clerk/nextjs";
 
+//Toast
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+
+
 // Fonts
 const interFont = Inter({ subsets: ["latin"] });
 const barlowFont = Barlow({
@@ -32,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${interFont.className} ${barlowFont.variable}`}>
           <ThemeProvider
             attribute="class"
@@ -40,6 +45,8 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange>
             {children}
+            <Toaster />
+            <SonnerToaster position="bottom-left" />
           </ThemeProvider>
         </body>
       </html>
