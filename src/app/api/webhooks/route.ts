@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
             try {
                 const client = await clerkClient();
                 await client.users.updateUserMetadata(data.id, {
-                    privateMetadata: { role: dbUser.role },
+                    privateMetadata: { role: dbUser.role || "USER", },
                 });
 
                 console.log(`[Webhook] Updated Clerk metadata for user: ${data.id}`);
