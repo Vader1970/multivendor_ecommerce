@@ -74,3 +74,68 @@ export const upsertCategory = async (category: Category) => {
         throw error;
     }
 };
+
+//function: getAllCategories
+//Description: Retrieves all categories from the database.
+//Permission Level: Public
+//Returns: Array of categories sorted by updatedAt date in descending order.
+export const getAllCategories = async () => {
+    //Retrieve all categories from the database
+    const categories = await db.category.findMany({
+        orderBy: {
+            updatedAt: "desc",
+        },
+    });
+    return categories;
+}
+
+//function: getCategories
+//Description: Retrieves all categories from the database.
+//Permission Level: Public
+//Parameters:
+//- categoryId: The ID of the category to be retrieved.
+//Returns: Details of the requested category.
+export const getCategory = async (categoryId: string) => {
+    //Ensure category ID is provided
+    if (!categoryId) throw new Error("Please provide a category ID.");
+
+    //Retrieve the category from the database
+    const category = await db.category.findUnique({
+        where: {
+            id: categoryId,
+        }
+    });
+    return category;
+}
+
+//function: deleteCategory
+//Description: Deletes a category from the database.
+//Permission Level: Admin only
+//Parameters:
+//- categoryId: The ID of the category to be deleted.
+//Returns: Response indicating success or failure of the deletion operation.
+export const deleteCategory = async (categoryId: string) => {
+    //get current user
+    const user = await currentUser();
+
+    //check if user is authenticated
+    if (!user) throw new Error("Unauthenticated.");
+
+    //Verify admin permission
+    if (user.privateMetadata.role !== "ADMIN")
+        throw new Error(
+            "Unauthorized Access: Admin Privileges Required for Entry."
+        );
+
+    //Ensure category ID is provided
+    if (!categoryId) throw new Error("Please provide a category ID.");
+
+    ////Delete category from database
+    const response = await db.category.delete({
+        where: {
+            id: categoryId,
+        }
+    })
+    return response;
+}
+

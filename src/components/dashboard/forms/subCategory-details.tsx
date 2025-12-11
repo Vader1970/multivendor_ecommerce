@@ -1,5 +1,5 @@
 /**
- * Category Details Form Component
+ * SubCategory Details Form Component
  * 
  * This component provides a form interface for creating and editing categories.
  * It handles both new category creation and updating existing categories.
@@ -22,7 +22,7 @@
 import { FC, useEffect } from "react";
 
 // Prisma model
-import { Category } from "@prisma/client";
+import { Category, SubCategory } from "@prisma/client";
 
 // Form handling utilities
 import * as z from "zod";
@@ -30,7 +30,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Schema
-import { CategoryFormSchema } from "@/lib/schemas";
+import { SubCategoryFormSchema } from "@/lib/schemas";
 
 // UI Components
 import { AlertDialog } from "@/components/ui/alert-dialog";
@@ -56,34 +56,37 @@ import { Input } from "@/components/ui/input";
 import ImageUpload from "../shared/image-upload";
 
 // Queries
-import { upsertCategory } from "@/queries/category";
+import { upsertSubCategory } from "@/queries/subCategory";
 
 // Utils
 import { v4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /**
- * Props interface for CategoryDetails component
+ * Props interface for SubCategoryDetails component
  * 
- * @param data - Optional Category object. If provided, the form will be in "edit mode"
- *               and pre-populated with the category's existing data. If undefined,
+ * @param data - Optional SubCategory object. If provided, the form will be in "edit mode"
+ *               and pre-populated with the SubCategory's existing data. If undefined,
  *               the form will be in "create mode" with empty fields.
  * @param cloudinary_key - The Cloudinary upload preset key for image uploads
  */
-interface CategoryDetailsProps {
-    data?: Category;
+interface SubCategoryDetailsProps {
+    data?: SubCategory;
+    categories: Category[];
     // cloudinary_key: string;
 }
 
 /**
- * CategoryDetails Component
+ * SubCategoryDetails Component
  * 
- * Main form component for category management. Handles both creation and editing
- * of categories with full form validation and error handling.
+ * Main form component for SubCategory management. Handles both creation and editing
+ * of SubCategories with full form validation and error handling.
  */
-const CategoryDetails: FC<CategoryDetailsProps> = ({
+const SubCategoryDetails: FC<SubCategoryDetailsProps> = ({
     data,
+    categories,
     // cloudinary_key,
 }) => {
     // Initializing necessary hooks
@@ -99,18 +102,19 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
      * Default values are set from the data prop if available (edit mode),
      * otherwise fields start empty (create mode).
      */
-    const form = useForm<z.infer<typeof CategoryFormSchema>>({
+    const form = useForm<z.infer<typeof SubCategoryFormSchema>>({
         mode: "onChange", // Form validation mode - validates on every change
-        resolver: zodResolver(CategoryFormSchema), // Resolver for form validation using Zod schema
+        resolver: zodResolver(SubCategoryFormSchema), // Resolver for form validation using Zod schema
         defaultValues: {
             // Setting default form values from data (if available)
-            // If data exists, we're editing; otherwise, we're creating a new category
+            // If data exists, we're editing; otherwise, we're creating a new SubCategory
             name: data?.name,
             // Image is stored as array of objects with url property in the form,
             // but as a single URL string in the database
             image: data?.image ? [{ url: data?.image }] : [],
             url: data?.url,
             featured: data?.featured,
+            categoryId: data?.categoryId,
         },
     });
 
@@ -118,14 +122,17 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
     // This is used to disable form inputs and show loading state during submission
     const isLoading = form.formState.isSubmitting;
 
+    const formData = form.watch();
+    console.log("formData", formData);
+
     /**
      * Effect to reset form values when data prop changes
      * 
-     * This ensures that if the data prop is updated (e.g., after fetching category details),
+     * This ensures that if the data prop is updated (e.g., after fetching SubCategory details),
      * the form fields are automatically updated to reflect the new data.
      * 
      * This is particularly useful when:
-     * - The component is reused for different categories
+     * - The component is reused for different SubCategories
      * - Category data is loaded asynchronously
      */
     useEffect(() => {
@@ -135,6 +142,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                 image: [{ url: data?.image }], // Convert single URL to array format
                 url: data?.url,
                 featured: data?.featured,
+                categoryId: data?.categoryId,
             });
         }
     }, [data, form]);
@@ -143,34 +151,35 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
      * Submit handler for form submission
      * 
      * This function is called when the form is submitted and passes validation.
-     * It handles both creating new categories and updating existing ones.
+     * It handles both creating new SubCategories and updating existing ones.
      * 
      * Process:
      * 1. Determines if we're creating (no data.id) or updating (has data.id)
-     * 2. Calls upsertCategory with the form values
+     * 2. Calls upsertSubCategory with the form values
      * 3. Shows success toast message
      * 4. Navigates or refreshes based on operation type
      * 5. Handles and displays any errors
      * 
-     * @param values - The validated form values matching the CategoryFormSchema
+     * @param values - The validated form values matching the SubCategoryFormSchema
      */
-    const handleSubmit = async (values: z.infer<typeof CategoryFormSchema>) => {
+    const handleSubmit = async (values: z.infer<typeof SubCategoryFormSchema>) => {
         try {
             /**
-             * Upserting category data
+             * Upserting SubCategory data
              * 
              * Uses upsert operation which will:
-             * - Create a new category if id doesn't exist
-             * - Update existing category if id already exists
+             * - Create a new SubCategory if id doesn't exist
+             * - Update existing SubCategory if id already exists
              * 
              * For new categories, we generate a UUID. For existing ones, we use the existing id.
              */
-            const response = await upsertCategory({
+            const response = await upsertSubCategory({
                 id: data?.id ? data.id : v4(), // Use existing ID or generate new UUID
                 name: values.name,
                 image: values.image[0].url, // Extract URL from array format
                 url: values.url,
                 featured: values.featured,
+                categoryId: values.categoryId,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -179,17 +188,17 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
             // Different messages for create vs update operations
             toast({
                 title: data?.id
-                    ? "Category has been updated."
+                    ? "SubCategory has been updated."
                     : `Congratulations! '${response?.name}' is now created.`,
             });
 
             // Redirect or Refresh data
             // For updates: refresh current page to show updated data
-            // For creates: navigate to categories list page
+            // For creates: navigate to SubCategories list page
             if (data?.id) {
                 router.refresh();
             } else {
-                router.push("/dashboard/admin/categories");
+                router.push("/dashboard/admin/subCategories");
             }
         } catch (error: any) {
             // Handling form submission errors
@@ -214,12 +223,12 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
         <AlertDialog>
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Category Information</CardTitle>
+                    <CardTitle>SubCategory Information</CardTitle>
                     <CardDescription>
                         {/* Dynamic description based on whether we're creating or editing */}
                         {data?.id
-                            ? `Update ${data?.name} category information.`
-                            : " Lets create a category. You can edit category later from the categories table or the category page."}
+                            ? `Update ${data?.name} SubCategory information.`
+                            : " Lets create a SubCategory. You can edit SubCategory later from the SubCategories table or the SubCategory page."}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -235,7 +244,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                             {/* 
                                 Image Upload Field
                                 
-                                This field handles category image uploads via Cloudinary.
+                                This field handles SubCategory image uploads via Cloudinary.
                                 The field value is stored as an array of objects: [{ url: "..." }]
                                 but the ImageUpload component expects an array of URLs.
                                 
@@ -273,9 +282,9 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                             />
 
                             {/* 
-                                Category Name Field
+                                SubCategory Name Field
                                 
-                                Text input for the category's display name.
+                                Text input for the SubCategory's display name.
                                 Validated by schema: 2-50 chars, alphanumeric + spaces only.
                             */}
                             <FormField
@@ -283,7 +292,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem className="flex-1">
-                                        <FormLabel>Category name</FormLabel>
+                                        <FormLabel>SubCategory name</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="Name"
@@ -297,10 +306,10 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                             />
 
                             {/* 
-                                Category URL/Slug Field
+                                SubCategory URL/Slug Field
                                 
-                                Text input for the URL-friendly category identifier.
-                                Used in routes like /category/electronics
+                                Text input for the URL-friendly SubCategory identifier.
+                                Used in routes like /subCategory/electronics
                                 Validated by schema: 2-50 chars, alphanumeric + hyphens/underscores only.
                             */}
                             <FormField
@@ -308,10 +317,10 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                                 name="url"
                                 render={({ field }) => (
                                     <FormItem className="flex-1">
-                                        <FormLabel>Category url</FormLabel>
+                                        <FormLabel>SubCategory url</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="/category-url"
+                                                placeholder="/subCategory-url"
                                                 {...field}
                                                 readOnly={isLoading}
                                             />
@@ -321,10 +330,35 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                                 )}
                             />
 
+                            <FormField
+                                control={form.control}
+                                name="categoryId"
+                                render={({ field }) => (
+                                    <FormItem className="flex-1">
+                                        <FormLabel>Category</FormLabel>
+                                        <Select disabled={isLoading || categories.length === 0} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue defaultValue={field.value} placeholder="Select a category" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {
+                                                    categories.map((category) => (
+                                                        <SelectItem key={category.id} value={category.id}>{category.name}
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage /> {/* Displays validation error messages */}
+                                    </FormItem>
+                                )}
+                            />
+
                             {/* 
-                                Featured Category Checkbox
+                                Featured SubCategory Checkbox
                                 
-                                Boolean field to mark category as featured.
+                                Boolean field to mark SubCategory as featured.
                                 Featured categories appear on the homepage.
                                 Uses a custom layout with checkbox and description.
                             */}
@@ -343,7 +377,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                                         <div className="space-y-1 leading-none">
                                             <FormLabel>Featured</FormLabel>
                                             <FormDescription>
-                                                This Category will appear on the home page
+                                                This SubCategory will appear on the home page
                                             </FormDescription>
                                         </div>
                                     </FormItem>
@@ -355,8 +389,8 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                                 
                                 Button text changes based on:
                                 - Loading state: Shows "loading..."
-                                - Edit mode (data?.id exists): "Save category information"
-                                - Create mode: "Create category"
+                                - Edit mode (data?.id exists): "Save SubCategory information"
+                                - Create mode: "Create SubCategory"
                                 
                                 Button is disabled during form submission to prevent double-submission.
                             */}
@@ -364,15 +398,15 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                                 {isLoading
                                     ? "loading..."
                                     : data?.id
-                                        ? "Save category information"
-                                        : "Create category"}
+                                        ? "Save SubCategory information"
+                                        : "Create SubCategory"}
                             </Button>
                         </form>
                     </Form>
                 </CardContent>
             </Card>
-        </AlertDialog>
+        </AlertDialog >
     );
 };
 
-export default CategoryDetails;
+export default SubCategoryDetails;

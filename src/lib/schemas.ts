@@ -96,3 +96,98 @@ export const CategoryFormSchema = z.object({
      */
     featured: z.boolean().default(false),
 });
+
+/**
+ * SubCategory Form Schema
+ * 
+ * Defines the validation rules for subcategory creation and editing forms.
+ * This schema is used with react-hook-form to validate subcategory data before submission.
+ * 
+ * Fields:
+ * - name: Subcategory display name (2-50 chars, alphanumeric + spaces only)
+ * - image: Array containing exactly one image object with a URL
+ * - url: URL-friendly slug for the subcategory (2-50 chars, alphanumeric + hyphens/underscores)
+ * - categoryId: UUID of the parent category (required relationship)
+ * - featured: Boolean flag indicating if subcategory should be featured on homepage
+ * 
+ * Note: Similar to CategoryFormSchema but includes categoryId to link to parent category
+ */
+export const SubCategoryFormSchema = z.object({
+    /**
+     * SubCategory Name Field
+     * 
+     * Validates the subcategory's display name with the following rules:
+     * - Required field (cannot be empty)
+     * - Must be a string type
+     * - Minimum 2 characters (ensures meaningful names)
+     * - Maximum 50 characters (prevents overly long names)
+     * - Only allows letters, numbers, and spaces (no special characters)
+     */
+    name: z
+        .string({
+            required_error: "SubCategory name is required",
+            invalid_type_error: "SubCategory name must be a string",
+        })
+        .min(2, { message: "SubCategory name must be at least 2 characters long." })
+        .max(50, { message: "SubCategory name cannot exceed 50 characters." })
+        .regex(/^[a-zA-Z0-9\s]+$/, {
+            message:
+                "Only letters, numbers, and spaces are allowed in the subCategory name.",
+        }),
+    /**
+     * SubCategory Image Field
+     * 
+     * Validates that exactly one image is provided for the subcategory.
+     * The image is stored as an array of objects, each containing a URL string.
+     * This structure allows for future expansion to multiple images if needed.
+     * 
+     * Structure: [{ url: "https://..." }]
+     */
+    image: z
+        .object({ url: z.string() }) // The image URL (typically from Cloudinary)
+        .array() // Array of image objects
+        .length(1, "Choose only one subCategory image"), // Must contain exactly one image
+    /**
+     * SubCategory URL/Slug Field
+     * 
+     * Validates the URL-friendly identifier for the subcategory (used in routes).
+     * This is typically used to create SEO-friendly URLs like /category/electronics/laptops
+     * 
+     * Rules:
+     * - Required field
+     * - Must be a string
+     * - 2-50 characters long
+     * - Only letters, numbers, hyphens, and underscores
+     * - No consecutive special characters (prevents URLs like "subcategory--name")
+     * 
+     * Regex breakdown: /^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_-]+$/
+     * - ^(?!.*(?:[-_ ]){2,}) - Negative lookahead: no consecutive hyphens/underscores/spaces
+     * - [a-zA-Z0-9_-]+$ - Only alphanumeric, hyphens, and underscores allowed
+     */
+    url: z
+        .string({
+            required_error: "SubCategory url is required",
+            invalid_type_error: "SubCategory url must be a string",
+        })
+        .min(2, { message: "SubCategory url must be at least 2 characters long." })
+        .max(50, { message: "SubCategory url cannot exceed 50 characters." })
+        .regex(/^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_-]+$/, {
+            message:
+                "Only letters, numbers, hyphen, and underscore are allowed in the subCategory url, and consecutive occurrences of hyphens, underscores, or spaces are not permitted.",
+        }),
+    /**
+     * Parent Category ID Field
+     * 
+     * Validates that a valid UUID is provided for the parent category.
+     * This creates the relationship between subcategory and its parent category.
+     * The UUID format ensures referential integrity with the database.
+     */
+    categoryId: z.string().uuid(),
+    /**
+     * Featured SubCategory Flag
+     * 
+     * Boolean field indicating whether this subcategory should be featured on the homepage.
+     * Defaults to false if not provided, meaning subcategories are not featured by default.
+     */
+    featured: z.boolean().default(false),
+});
