@@ -33,18 +33,23 @@ export default function UserInfo({ user }: { user: User | null }) {
                     Main container button - uses ghost variant for minimal styling
                     Can be extended with onClick handler for profile actions/dropdown
                     Full width with vertical padding and margin for spacing
+                    h-auto allows button to expand vertically for wrapped content
+                    overflow-hidden ensures content stays within hover background
                 */}
-                <Button className="w-full mt-5 mb-4 flex items-center justify-between py-10" variant="ghost">
+                <Button className="w-full mt-5 mb-4 flex items-start justify-start py-10 whitespace-normal h-auto overflow-hidden" variant="ghost">
                     {/* 
                         Container for avatar and user details
                         Flex layout with gap for spacing between avatar and text
+                        min-w-0 allows flex item to shrink below content size for proper wrapping
+                        w-full ensures it takes full width of button
                     */}
-                    <div className="flex items-center text-left gap-2">
+                    <div className="flex items-start text-left gap-2 min-w-0 flex-1 w-full overflow-hidden">
                         {/* 
                             User avatar component
                             Large size (64x64px / w-16 h-16) for prominent display
+                            flex-shrink-0 prevents avatar from shrinking
                         */}
-                        <Avatar className="w-16 h-16">
+                        <Avatar className="w-16 h-16 flex-shrink-0">
                             {/* 
                                 User's profile image from Clerk
                                 Falls back to initials if image is not available
@@ -67,17 +72,21 @@ export default function UserInfo({ user }: { user: User | null }) {
                         {/* 
                             User details container
                             Vertical flex layout with small gap between elements
+                            min-w-0 and overflow-wrap allow text to wrap properly
+                            w-full and overflow-hidden ensure content stays within bounds
                         */}
-                        <div className="flex flex-col gap-y-1">
+                        <div className="flex flex-col gap-y-1 min-w-0 flex-1 w-full overflow-hidden">
                             {/* User's full name */}
-                            {user?.firstName} {user?.lastName}
+                            <span className="break-words w-full">{user?.firstName} {user?.lastName}</span>
 
                             {/* 
                                 User's email address
                                 Uses muted foreground color for secondary information
                                 Displays the first email address from Clerk's emailAddresses array
+                                break-all allows long email addresses to wrap to multiple lines
+                                w-full ensures it respects container width
                             */}
-                            <span className="text-muted-foreground">
+                            <span className="text-xs text-muted-foreground break-all w-full">
                                 {user?.emailAddresses[0].emailAddress}
                             </span>
 
