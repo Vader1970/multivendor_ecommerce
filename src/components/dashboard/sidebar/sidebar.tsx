@@ -1,9 +1,20 @@
+//React
 import { FC } from "react";
+
+//Clerk
 import { currentUser } from "@clerk/nextjs/server";
+
+//Custome UI Components
 import Logo from "@/components/shared/logo";
 import UserInfo from "./user-info";
 import SidebarNavAdmin from "./nav-admin";
-import { adminDashboardSidebarOptions } from "@/constants/data";
+import SidebarNavSeller from "./nav-seller";
+
+//Menu Links
+import { adminDashboardSidebarOptions, SellerDashboardSidebarOptions } from "@/constants/data";
+
+//Prisma Modals
+import { Store } from "@prisma/client";
 
 /**
  * Props interface for the Sidebar component
@@ -14,6 +25,11 @@ interface SidebarProps {
      * When true, the admin navigation menu will be rendered.
      */
     isAdmin?: boolean;
+    /**
+     * Optional list of stores associated with the authenticated user.
+     * When provided, the sidebar will display navigation links for each store.
+     */
+    stores?: Store[];
 }
 
 /**
@@ -75,7 +91,11 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
                 Passes the admin dashboard menu links configuration
                 This includes links like Dashboard, Stores, Orders, Categories, etc.
             */}
-            {isAdmin && <SidebarNavAdmin menuLinks={adminDashboardSidebarOptions} />}
+            {isAdmin ? (
+                <SidebarNavAdmin menuLinks={adminDashboardSidebarOptions} />
+            ) : (
+                <SidebarNavSeller menuLinks={SellerDashboardSidebarOptions} />
+            )}
         </div>
     )
 };
