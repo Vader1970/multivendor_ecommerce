@@ -57,7 +57,7 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
     const user = await currentUser();
 
     return (
-        <div className="w-[300px] border-r h-screen p-4 flex flex-col fixed top-0 left-0 bottom-0">
+        <div className="w-[300px] border-r h-screen p-4 flex flex-col fixed top-0 left-0 bottom-0 overflow-hidden">
             {/* 
                 Main sidebar container:
                 - Fixed width of 300px
@@ -67,6 +67,7 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
                 - Flex column layout for vertical stacking
                 - Fixed positioning (stays in place during scroll)
                 - Anchored to top, left, and bottom of viewport
+                - overflow-hidden prevents the container itself from scrolling
             */}
 
             {/* 
@@ -90,12 +91,17 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
                 Only displays if isAdmin prop is true
                 Passes the admin dashboard menu links configuration
                 This includes links like Dashboard, Stores, Orders, Categories, etc.
+                - flex-1 makes it take remaining space
+                - min-h-0 allows it to shrink below content size (needed for scrolling)
+                - overflow-y-auto enables vertical scrolling when content exceeds available space
             */}
-            {isAdmin ? (
-                <SidebarNavAdmin menuLinks={adminDashboardSidebarOptions} />
-            ) : (
-                <SidebarNavSeller menuLinks={SellerDashboardSidebarOptions} />
-            )}
+            <div className="flex-1 min-h-0 overflow-y-auto">
+                {isAdmin ? (
+                    <SidebarNavAdmin menuLinks={adminDashboardSidebarOptions} />
+                ) : (
+                    <SidebarNavSeller menuLinks={SellerDashboardSidebarOptions} />
+                )}
+            </div>
         </div>
     )
 };

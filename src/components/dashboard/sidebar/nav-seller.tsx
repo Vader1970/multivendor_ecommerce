@@ -65,7 +65,7 @@ export default function SidebarNavSeller({
                 <CommandInput placeholder="Search..." />
 
                 {/* Container for the list of navigation items */}
-                <CommandList className="py-2 overflow-visible">
+                <CommandList className="py-2 max-h-none overflow-y-auto">
                     {/* Displayed when search returns no matching results */}
                     <CommandEmpty>No Links Found.</CommandEmpty>
 
