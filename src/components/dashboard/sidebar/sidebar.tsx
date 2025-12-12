@@ -15,6 +15,7 @@ import { adminDashboardSidebarOptions, SellerDashboardSidebarOptions } from "@/c
 
 //Prisma Modals
 import { Store } from "@prisma/client";
+import StoreSwitcher from "./store-switcher";
 
 /**
  * Props interface for the Sidebar component
@@ -51,7 +52,7 @@ interface SidebarProps {
  * @param {boolean} [props.isAdmin] - Whether to show admin navigation menu
  * @returns {Promise<JSX.Element>} The rendered sidebar component
  */
-const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
+const Sidebar: FC<SidebarProps> = async ({ isAdmin, stores }) => {
     // Fetch the currently authenticated user from Clerk
     // This is an async server-side operation, so the component must be async
     const user = await currentUser();
@@ -85,6 +86,9 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
                 Passes the user object to display name, email, and avatar
             */}
             {user && <UserInfo user={user} />}
+
+            {/* Conditionally render store switcher */}
+            {!isAdmin && stores && <StoreSwitcher stores={stores} />}
 
             {/* 
                 Conditionally render admin navigation menu
