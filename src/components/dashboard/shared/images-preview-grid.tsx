@@ -1,31 +1,59 @@
-//React
+// React, Next.js
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
-import { FC } from "react";
 
-//Import of the image shown when there are no images available
+// Import of the image shown when there are no images available
 import NoImageImg from "../../../../public/assets/images/no_image_2.png";
-import { cn, } from "@/lib/utils";
+
+// Utils
+import { cn, getDominantColors, getGridClassName } from "@/lib/utils";
+
+//Icons
+import { Trash } from "lucide-react";
+import ColorPalette from "./color-palette";
 
 interface ImagesPreviewGridProps {
     images: { url: string }[]; // Array of image URLs
-    onRemove: (value: string) => void;
+    onRemove: (value: string) => void; // Callback function when an image is removed
+    colors?: { color: string }[]; // List of colors from form
+    setColors: Dispatch<SetStateAction<{ color: string }[]>>; // Setter function for colors
 }
 
 const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
     images,
-    onRemove
+    onRemove,
+    colors,
+    setColors,
 }) => {
-
-    //Calculate the number of images
+    // Calculate the number of images
     let imagesLength = images.length;
 
-    const gridClassName =
-        imagesLength === 2 ? "grid-cols-2" :
-            imagesLength === 3 ? "grid-cols-2 grid-rows-2" :
-                imagesLength === 4 ? "grid-cols-2" :
-                    imagesLength === 5 ? "grid-cols-2 grid-rows-6" :
-                        imagesLength === 6 ? "grid-cols-2" :
-                            "";
+    // Get the grid class name based on the number of images
+    const GridClassName = getGridClassName(imagesLength);
+
+    // Extract images colors
+    const [colorPalettes, setColorPalettes] = useState<string[][]>([]);
+    useEffect(() => {
+        const fecthColors = async () => {
+            const palettes = await Promise.all(
+                images.map(async (img) => {
+                    try {
+                        const colors = await getDominantColors(img.url);
+                        return colors;
+                    } catch (error) {
+                        return [];
+                    }
+                })
+            );
+            setColorPalettes(palettes);
+        };
+
+        if (images.length > 0) {
+            fecthColors();
+        }
+    }, [images]);
+
+    console.log("colorPalettes--->", colorPalettes);
 
 
     // If there are no images, display a placeholder image
@@ -48,7 +76,7 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
                 <div
                     className={cn(
                         "grid h-[800px] overflow-hidden bg-white rounded-md",
-                        gridClassName
+                        GridClassName
                     )}
                 >
                     {images.map((img, i) => (
@@ -70,13 +98,39 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
                                 height={800}
                                 className="w-full h-full object-cover object-top"
                             />
+                            {/* Actions */}
+                            <div
+                                className={cn(
+                                    "absolute top-0 left-0 right-0 bottom-0 hidden group-hover:flex bg-white/55 cursor-pointer  items-center justify-center flex-col gap-y-3 transition-all duration-500",
+                                    {
+                                        "!pb-[40%]": imagesLength === 1,
+                                    }
+                                )}
+                            >
+                                {/* Color palette (Extract colors) */}
+                                <ColorPalette
+                                    colors={colors}
+                                    setColors={setColors}
+                                    extractedColors={colorPalettes[i]}
+                                />
+                                {/* Delete Button */}
+                                <button
+                                    className="Btn"
+                                    type="button"
+                                    onClick={() => onRemove(img.url)}
+                                >
+                                    <div className="sign">
+                                        <Trash size={18} />
+                                    </div>
+                                    <div className="text">Delete</div>
+                                </button>
+                            </div>
                         </div>
-                    ))
-                    }
+                    ))}
                 </div>
             </div>
-        )
+        );
     }
-}
+};
 
 export default ImagesPreviewGrid;

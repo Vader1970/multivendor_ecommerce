@@ -102,6 +102,11 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     //Temporary state for images
     const [images, setImages] = useState<{ url: string }[]>([]);
 
+    // State for colors
+    const [colors, setColors] = useState<{ color: string }[]>(
+        data?.colors || [{ color: "" }]
+    );
+
     /**
      * Form hook for managing form state and validation
      * 
@@ -286,6 +291,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                                             setImages(updatedImages);
                                                             field.onChange(updatedImages);
                                                         }}
+                                                        colors={colors}
+                                                        setColors={setColors}
                                                     />
                                                     <FormMessage className="!mt-4" />
                                                     <ImageUpload
