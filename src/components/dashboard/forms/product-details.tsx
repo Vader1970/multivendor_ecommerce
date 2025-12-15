@@ -23,7 +23,7 @@ import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Prisma model
-import { Category, Store, StoreStatus } from "@prisma/client";
+import { Category, StoreStatus, SubCategory } from "@prisma/client";
 
 // Form handling utilities
 import * as z from "zod";
@@ -45,11 +45,11 @@ import {
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-    FormDescription,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -68,6 +68,8 @@ import { v4 } from "uuid";
 import { ProductWithVariantType } from "@/lib/types";
 import ImagesPreviewGrid from "../shared/images-preview-grid";
 import ClickToAddInputs from "./click-to-add";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getAllSubCategorisForCategory } from "@/queries/category";
 
 
 interface ProductDetailsProps {
@@ -85,6 +87,9 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     // Initializing necessary hooks
     const { toast } = useToast(); // Hook for displaying toast messages
     const router = useRouter(); // Hook for routing
+
+    //State for subCategories
+    const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
 
     //State for colors
     const [colors, setColors] = useState<{ color: string }[]>([{ color: "" }]);
@@ -117,6 +122,17 @@ const ProductDetails: FC<ProductDetailsProps> = ({
             isSale: data?.isSale,
         },
     });
+
+    // UseEffect to get subCategories when user pick/change a category
+    const categoryId = form.watch("categoryId");
+
+    useEffect(() => {
+        const getSubCategories = async () => {
+            const res = await getAllSubCategorisForCategory(categoryId);
+            setSubCategories(res);
+        };
+        getSubCategories();
+    }, [form, categoryId]);
 
     //Extract errors state from form
     const errors = form.formState.errors;
@@ -212,7 +228,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                     control={form.control}
                                     name="images"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="w-full xl:border-r">
                                             <FormControl>
                                                 <>
                                                     <ImagesPreviewGrid
@@ -258,7 +274,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                     )}
                                 />
                                 {/* Colors */}
-                                <div className=" flex flex-col gap-y-3 xl:pl-5">
+                                <div className="w-full flex flex-col gap-y-3 xl:pl-5">
                                     <ClickToAddInputs
                                         details={colors}
                                         setDetails={setColors}
@@ -274,45 +290,177 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                             </div>
 
                             {/* Name */}
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem className="flex-1">
-                                        <FormLabel>Store name</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Name"
-                                                {...field} // Spreads onChange, onBlur, value, name, ref
-                                                readOnly={isLoading} // Prevents editing during submission
-                                            />
-                                        </FormControl>
-                                        <FormMessage /> {/* Displays validation error messages */}
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="flex flex-col lg:flex-row gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Product name</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Product Name"
+                                                    {...field} // Spreads onChange, onBlur, value, name, ref
+                                                    readOnly={isLoading} // Prevents editing during submission
+                                                />
+                                            </FormControl>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="variantName"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Variant name</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Variant Name"
+                                                    {...field} // Spreads onChange, onBlur, value, name, ref
+                                                    readOnly={isLoading} // Prevents editing during submission
+                                                />
+                                            </FormControl>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
                             {/* Description */}
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                    <FormItem className="flex-1">
-                                        <FormLabel>Store description</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Description"
-                                                {...field} // Spreads onChange, onBlur, value, name, ref
-                                                readOnly={isLoading} // Prevents editing during submission
-                                            />
-                                        </FormControl>
-                                        <FormMessage /> {/* Displays validation error messages */}
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="flex flex-col lg:flex-row gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Product description</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Product Description"
+                                                    {...field} // Spreads onChange, onBlur, value, name, ref
+                                                    readOnly={isLoading} // Prevents editing during submission
+                                                />
+                                            </FormControl>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="variantDescription"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Variant description</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Variant Description"
+                                                    {...field} // Spreads onChange, onBlur, value, name, ref
+                                                    readOnly={isLoading} // Prevents editing during submission
+                                                />
+                                            </FormControl>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            {/* Category - SubCategory */}
+                            <div className="flex gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="categoryId"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Product Category</FormLabel>
+                                            <Select disabled={isLoading || categories.length === 0} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue defaultValue={field.value} placeholder="Select a category" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {
+                                                        categories.map((category) => (
+                                                            <SelectItem key={category.id} value={category.id}>{category.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                                {
+                                    form.watch("categoryId") && (
+                                        <FormField
+                                            control={form.control}
+                                            name="subCategoryId"
+                                            render={({ field }) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Product SubCategory</FormLabel>
+                                                    <Select disabled={isLoading || categories.length === 0} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue defaultValue={field.value} placeholder="Select a category" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {
+                                                                subCategories.map((sub) => (
+                                                                    <SelectItem key={sub.id} value={sub.id}>{sub.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage /> {/* Displays validation error messages */}
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )
+                                }
+                            </div>
+
+                            {/* Brand, Sku */}
+                            <div className="flex flex-col lg:flex-row gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="brand"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Product brand</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Brand"
+                                                    {...field} // Spreads onChange, onBlur, value, name, ref
+                                                    readOnly={isLoading} // Prevents editing during submission
+                                                />
+                                            </FormControl>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="sku"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormLabel>Product sku</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Sku"
+                                                    {...field} // Spreads onChange, onBlur, value, name, ref
+                                                    readOnly={isLoading} // Prevents editing during submission
+                                                />
+                                            </FormControl>
+                                            <FormMessage /> {/* Displays validation error messages */}
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
                             {/* Sizes */}
-                            <div className="w-full flex flex-col gap-y-3 xl:pl-5">
+                            <div className="w-full flex flex-col gap-y-3">
                                 <ClickToAddInputs
                                     details={sizes}
                                     setDetails={setSizes}
@@ -330,6 +478,29 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                     </span>
                                 )}
                             </div>
+
+                            {/* Is On Sale */}
+                            <FormField
+                                control={form.control}
+                                name="isSale"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                // @ts-ignore - Type mismatch between Checkbox and react-hook-form
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <div className="space-y-1 leading-none">
+                                            <FormLabel>On Sale</FormLabel>
+                                            <FormDescription>
+                                                Is this product on sale?
+                                            </FormDescription>
+                                        </div>
+                                    </FormItem>
+                                )}
+                            />
 
                             <Button type="submit" disabled={isLoading}>
                                 {isLoading
