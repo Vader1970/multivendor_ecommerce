@@ -20,7 +20,7 @@
 
 // React, Next.js
 import { FC, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 // Prisma model
 import { Category, StoreStatus, SubCategory } from "@prisma/client";
@@ -60,6 +60,10 @@ import { useToast } from "@/hooks/use-toast";
 
 // Queries
 import { upsertStore } from "@/queries/store";
+import { getAllSubCategorisForCategory } from "@/queries/category";
+
+//ReactTags
+import { WithOutContext as ReactTags } from "react-tag-input";
 
 // Utils
 import { v4 } from "uuid";
@@ -69,7 +73,6 @@ import { ProductWithVariantType } from "@/lib/types";
 import ImagesPreviewGrid from "../shared/images-preview-grid";
 import ClickToAddInputs from "./click-to-add";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getAllSubCategorisForCategory } from "@/queries/category";
 
 
 interface ProductDetailsProps {
@@ -100,6 +103,12 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     //Temporary state for images
     const [images, setImages] = useState<{ url: string }[]>([]);
 
+    // Scroll to top on mount and route change
+    const pathname = usePathname();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
 
     const form = useForm<z.infer<typeof ProductFormSchema>>({
         mode: "onChange", // Form validation mode - validates on every change
@@ -192,11 +201,29 @@ const ProductDetails: FC<ProductDetailsProps> = ({
         }
     };
 
+    // Handle keywords input
+    const [keywords, setKeywords] = useState<string[]>(data?.keywords || []);
+
+    interface Keyword {
+        id: string;
+        text: string;
+    }
+
+    const handleAddition = (keyword: Keyword) => {
+        if (keywords.length === 10) return;
+        setKeywords([...keywords, keyword.text]);
+    };
+
+    const handleDeleteKeyword = (i: number) => {
+        setKeywords(keywords.filter((_, index) => index !== i));
+    };
+
     //Whenever colors, sizes keywords changes we update the form values
     useEffect(() => {
         form.setValue("colors", colors);
         form.setValue("sizes", sizes);
-    }, [form, colors, sizes])
+        form.setValue("keywords", keywords);
+    }, [form, colors, sizes, keywords])
 
     return (
         <AlertDialog>
@@ -280,6 +307,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                         setDetails={setColors}
                                         initialDetail={{ color: "" }}
                                         header="Colors"
+                                        colorPicker
                                     />
                                     {errors.colors && (
                                         <span className="text-sm font-medium text-destructive">
@@ -457,6 +485,42 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                         </FormItem>
                                     )}
                                 />
+                            </div>
+
+                            {/* Keywords*/}
+                            <div className="space-y-3">
+                                <FormField
+                                    control={form.control}
+                                    name="keywords"
+                                    render={({ field }) => (
+                                        <FormItem className="relative flex-1">
+                                            <FormLabel>Product Keywords</FormLabel>
+                                            <FormControl>
+                                                <ReactTags
+                                                    handleAddition={handleAddition}
+                                                    handleDelete={() => { }}
+                                                    placeholder="Keywords (e.g., winter jacket, warm, stylish)"
+                                                    classNames={{
+                                                        tagInputField:
+                                                            "bg-background border rounded-md p-2 w-full focus:outline-none",
+                                                    }}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex flex-wrap gap-1">
+                                    {
+                                        keywords.map((k, i) =>
+                                            <div key={i} className="text-sm inline-flex items-center px-3 py-1 bg-blue-200 text-blue-700 rounded-full gap-x-2">
+                                                <span>{k}</span>
+                                                <span className="cursor-pointer" onClick={() => handleDeleteKeyword(i)}>
+                                                    x
+                                                </span>
+                                            </div>
+                                        )
+                                    }
+                                </div>
                             </div>
 
                             {/* Sizes */}
