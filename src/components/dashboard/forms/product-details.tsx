@@ -23,7 +23,7 @@ import { FC, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 // Prisma model
-import { Category, StoreStatus, SubCategory } from "@prisma/client";
+import { Category, SubCategory } from "@prisma/client";
 
 // Form handling utilities
 import * as z from "zod";
@@ -59,7 +59,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 // Queries
-import { upsertStore } from "@/queries/store";
+import { upsertProduct } from "@/queries/product";
 import { getAllSubCategorisForCategory } from "@/queries/category";
 
 //ReactTags
@@ -127,7 +127,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
             sku: data?.sku,
             colors: data?.colors || [{ color: "" }],
             sizes: data?.sizes,
-            keywords: data?.keywords,
+            keywords: data?.keywords || [],
             isSale: data?.isSale,
         },
     });
@@ -157,38 +157,39 @@ const ProductDetails: FC<ProductDetailsProps> = ({
 
     const handleSubmit = async (values: z.infer<typeof ProductFormSchema>) => {
         try {
-
-            const statusValue = values.status
-                ? (typeof values.status === 'string'
-                    ? (values.status as StoreStatus)
-                    : values.status)
-                : StoreStatus.PENDING;
-
-            const response = await upsertStore({
-                id: data?.id ? data.id : v4(), // Use existing ID or generate new UUID
+            const response = await upsertProduct({
+                productId: data?.productId ? data.productId : v4(),
+                variantId: data?.variantId ? data.variantId : v4(),
                 name: values.name,
                 description: values.description,
-                email: values.email,
-                phone: values.phone,
-                logo: values.logo[0].url, // Extract URL from array format
-                cover: values.cover[0].url, // Extract URL from array format
-                url: values.url,
-                featured: values.featured ?? false,
-                status: statusValue,
-            });
+                variantName: values.variantName,
+                variantDescription: values.variantDescription || "",
+                images: values.images,
+                categoryId: values.categoryId,
+                subCategoryId: values.subCategoryId,
+                isSale: values.isSale || false,
+                brand: values.brand,
+                sku: values.sku,
+                colors: values.colors,
+                sizes: values.sizes || [],
+                keywords: values.keywords || [],
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }, storeUrl);
 
 
             toast({
-                title: data?.id
-                    ? "Store has been updated."
-                    : `Congratulations! '${response?.name}' is now created.`,
+                title: data?.productId && data?.variantId
+                    ? "Product has been updated."
+                    : `Congratulations! product '${response?.slug}' is now created.`,
             });
 
 
-            if (data?.id) {
+            //Redirect or Refresh
+            if (data?.productId && data?.variantId) {
                 router.refresh();
             } else {
-                router.push(`/dashboard/seller/stores/${response?.url}`);
+                router.push(`/dashboard/seller/stores/${storeUrl}/products`);
             }
         } catch (error: any) {
 
@@ -506,6 +507,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                                     }}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

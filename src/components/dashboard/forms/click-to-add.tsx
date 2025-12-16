@@ -16,22 +16,22 @@ export interface Detail {
 }
 
 //Define props for the ClickToAddInputs component
-interface ClickToAddInputsProps {
-    details: Detail[]; //Array of detail objects
-    setDetails: React.Dispatch<React.SetStateAction<Detail[]>>; //Setter function for details
-    initialDetail?: Detail; //Optional initial detail object
+interface ClickToAddInputsProps<T extends Detail = Detail> {
+    details: T[]; //Array of detail objects
+    setDetails: React.Dispatch<React.SetStateAction<T[]>>; //Setter function for details
+    initialDetail?: T; //Optional initial detail object
     header: string; //Header text for the component
     colorPicker?: boolean; //Is color picker needed
 }
 
 //ClickToAddInputs component definition
-const ClickToAddInputs: FC<ClickToAddInputsProps> = ({
+function ClickToAddInputs<T extends Detail = Detail>({
     details,
     setDetails,
-    initialDetail = {}, //Default value for initialDetail is an empty array
+    initialDetail = {} as T, //Default value for initialDetail is an empty object
     header,
     colorPicker,
-}) => {
+}: ClickToAddInputsProps<T>) {
 
     //State to manage toggling color picker
     const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null);
@@ -183,7 +183,7 @@ const ClickToAddInputs: FC<ClickToAddInputsProps> = ({
                 </div>
             ))}
         </div>
-    )
+    );
 }
 
 export default ClickToAddInputs;
