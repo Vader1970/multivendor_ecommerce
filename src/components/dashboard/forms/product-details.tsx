@@ -76,7 +76,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 
 interface ProductDetailsProps {
-    data?: ProductWithVariantType;
+    data?: Partial<ProductWithVariantType>;
     categories: Category[];
     storeUrl: string;
 }
