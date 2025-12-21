@@ -214,3 +214,281 @@
 .perspective-1000 {
   perspective: 1000px;
 }
+
+/* Date time picker */
+.react-datetime-picker__wrapper {
+  border: none !important;
+}
+.react-datetime-picker__inputGroup__input {
+  padding: 0 3px !important;
+  min-width: 24px !important;
+  outline-color: #1087ff !important;
+  text-align: center !important;
+  align-items: center !important;
+}
+.react-datetime-picker__inputGroup__divider {
+  margin: 0 1px !important;
+}
+
+/* Date time picker buttons dark mode */
+.dark .react-datetime-picker__button svg,
+.dark .react-datetime-picker__clear-button svg,
+.dark .react-datetime-picker__calendar-button svg {
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.dark .react-datetime-picker__button,
+.dark .react-datetime-picker__clear-button,
+.dark .react-datetime-picker__calendar-button {
+  color: #ffffff !important;
+}
+
+/* Jodit editor dark mode */
+.jodit_theme_dark.jodit-container {
+  background-color: #1a1b1f !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-toolbar__box:not(:empty) {
+  background-color: #1a1b1f !important;
+}
+
+.jodit_theme_dark .jodit-wysiwyg {
+  background-color: #1a1b1f !important;
+}
+
+.jodit_theme_dark .jodit-toolbar-button__button:hover svg {
+  stroke: #575757 !important;
+  fill: #575757 !important;
+}
+
+.jodit_theme_dark .jodit-toolbar-button__button svg {
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.jodit_theme_dark .jodit-toolbar-button__button {
+  color: #ffffff !important;
+}
+
+.jodit_theme_dark .jodit-toolbar-editor-collection {
+  background-color: #1a1b1f !important;
+}
+
+.jodit_theme_dark .jodit-input {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-popup {
+  background-color: #1a1b1f !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-popup__content {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+}
+
+.jodit_theme_dark .jodit-popup__content input[type="text"],
+.jodit_theme_dark .jodit-popup__content input[type="url"],
+.jodit_theme_dark .jodit-popup__content input[type="email"],
+.jodit_theme_dark .jodit-popup__content textarea {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-popup__content input[type="text"]:focus,
+.jodit_theme_dark .jodit-popup__content input[type="url"]:focus,
+.jodit_theme_dark .jodit-popup__content input[type="email"]:focus,
+.jodit_theme_dark .jodit-popup__content textarea:focus {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+  outline-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-popup__content label {
+  color: #ffffff !important;
+}
+
+.jodit_theme_dark .jodit-form__group label {
+  color: #ffffff !important;
+}
+
+.jodit_theme_dark .jodit-form__group input,
+.jodit_theme_dark .jodit-form__group textarea {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-form__group input:focus,
+.jodit_theme_dark .jodit-form__group textarea:focus {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-dialog__content input,
+.jodit_theme_dark .jodit-dialog__content textarea {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-dialog__content input:focus,
+.jodit_theme_dark .jodit-dialog__content textarea:focus {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-dialog__content label {
+  color: #ffffff !important;
+}
+
+.jodit_theme_dark .jodit-popup__content input::placeholder,
+.jodit_theme_dark .jodit-popup__content textarea::placeholder,
+.jodit_theme_dark .jodit-form__group input::placeholder,
+.jodit_theme_dark .jodit-form__group textarea::placeholder,
+.jodit_theme_dark .jodit-dialog__content input::placeholder,
+.jodit_theme_dark .jodit-dialog__content textarea::placeholder {
+  color: #999999 !important;
+  opacity: 1 !important;
+}
+
+/* Additional selectors for Jodit popup inputs - catch all variations */
+.jodit_theme_dark .jodit-popup input,
+.jodit_theme_dark .jodit-popup textarea,
+.jodit_theme_dark .jodit-dialog input,
+.jodit_theme_dark .jodit-dialog textarea {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-popup input:focus,
+.jodit_theme_dark .jodit-popup textarea:focus,
+.jodit_theme_dark .jodit-dialog input:focus,
+.jodit_theme_dark .jodit-dialog textarea:focus {
+  background-color: #1a1b1f !important;
+  color: #ffffff !important;
+  border-color: #eeeeee2e !important;
+  outline-color: #eeeeee2e !important;
+}
+
+.jodit_theme_dark .jodit-popup input::placeholder,
+.jodit_theme_dark .jodit-popup textarea::placeholder,
+.jodit_theme_dark .jodit-dialog input::placeholder,
+.jodit_theme_dark .jodit-dialog textarea::placeholder {
+  color: #999999 !important;
+  opacity: 1 !important;
+}
+
+/* Calendar dark mode  */
+.dark .react-calendar {
+  background: #1a1b1f !important;
+}
+.dark .react-calendar__tile:enabled:hover {
+  color: #000;
+}
+.dark .react-calendar__tile--now {
+  color: #000;
+}
+
+/* Multi selct dark mode */
+.dark .rmsc .dropdown-container {
+  background-color: #1a1b1f !important;
+  border-color: #eeeeee2e !important;
+}
+
+.panel-content {
+  background-color: #1a1b1f !important;
+}
+
+.panel-content input:focus {
+  background-color: #1a1b1f !important;
+}
+
+.select-item:hover {
+  background-color: #303236 !important;
+}
+.select-item.selected {
+  background-color: #303236 !important;
+}
+
+/* Clock Popup Dark Mode - Dark background with white clock */
+.dark .react-datetime-picker__clock {
+  background-color: #1a1b1f !important;
+  border-color: #eeeeee2e !important;
+  border: 1px solid #eeeeee2e !important;
+  z-index: 50;
+}
+
+.dark .react-clock {
+  background-color: #1a1b1f !important;
+  border-color: #eeeeee2e !important;
+}
+
+.dark .react-clock__face {
+  background-color: #1a1b1f !important;
+  border-color: #ffffff !important;
+  border-width: 2px;
+}
+
+/* Clock hands - white */
+.dark .react-clock__hand {
+  background-color: #ffffff !important;
+}
+
+.dark .react-clock__hand__body {
+  background-color: #ffffff !important;
+}
+
+/* Clock marks (hour/minute indicators) - white */
+.dark .react-clock__mark {
+  background-color: #ffffff !important;
+}
+
+.dark .react-clock__mark__body {
+  background-color: #ffffff !important;
+}
+
+/* Second hand - can be a different color for visibility */
+.dark .react-clock__second-hand {
+  background-color: #ff4444 !important;
+}
+
+.dark .react-clock__second-hand__body {
+  background-color: #ff4444 !important;
+}
+
+/* Leading zeros visibility fix */
+.dark .react-datetime-picker__inputGroup__leadingZero {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline !important;
+}
+
+/* Force all text in datetime picker to be white in dark mode */
+.dark .react-datetime-picker__inputGroup,
+.dark .react-datetime-picker__inputGroup__input {
+  color: #ffffff !important;
+}
+
+.dark .react-datetime-picker__inputGroup__divider {
+  color: #ffffff !important;
+  opacity: 0.7 !important;
+}
+
+/* Calendar popup dark mode (if not already styled) */
+.dark .react-datetime-picker__calendar {
+  background-color: #1a1b1f !important;
+  border-color: #eeeeee2e !important;
+  z-index: 50;
+}

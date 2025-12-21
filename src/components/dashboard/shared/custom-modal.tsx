@@ -77,7 +77,7 @@ const CustomModal = ({ children, defaultOpen, subheading, heading }: Props) => {
                 - h-screen: full screen height on mobile
                 - bg-card: uses theme's card background color
             */}
-            <DialogContent className="overflow-y-scroll md:max-h-[700px] md:h-fit h-screen bg-card">
+            <DialogContent className="overflow-y-scroll md:max-h-[700px] md:h-fit h-screen bg-card w-[95vw] max-w-[95vw] sm:max-w-[1200px] sm:rounded-lg">
                 <DialogHeader className="pt-8 text-left">
                     {/* Conditionally render heading if provided */}
                     {heading && (
