@@ -120,9 +120,13 @@ model Product {
   subCategoryId String
   subCategory   SubCategory @relation("SubCategoryToProduct", fields: [subCategoryId], references: [id])
 
+  offerTagId String?
+  offerTag   OfferTag? @relation("OfferTagToProduct", fields: [offerTagId], references: [id])
+
   @@index([storeId])
   @@index([categoryId])
   @@index([subCategoryId])
+  @@index([offerTagId])
 }
 
 model ProductVariant {
@@ -219,6 +223,19 @@ model Question {
 
   productId String
   product   Product @relation("ProductQuestion", fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([productId])
+}
+
+model OfferTag {
+  id   String @id @default(uuid())
+  name String
+  url  String
+
+  products Product[] @relation("OfferTagToProduct")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
