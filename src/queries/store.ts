@@ -9,6 +9,9 @@ import { currentUser } from "@clerk/nextjs/server";
 //Prisma Model
 import { StoreStatus } from "@prisma/client";
 
+//Types
+import { StoreDefaultShippingType } from "@/lib/types";
+
 /**
  * Input type for upserting a store
  * Only includes fields that the client should control
@@ -118,6 +121,102 @@ export const upsertStore = async (store: UpsertStoreInput) => {
             },
         });
         return storeDetails;
+    } catch (error) {
+        //Log and re-throw any errors
+        console.log(error);
+        throw error;
+    }
+}
+
+//Function: getStoreDefaultShippingDetails
+//Description: Fetches the default shipping details for a store based on the store URL.
+//Parameters:
+// - storeUrl: The URL of the store to fetch default shipping details for.
+//Returns: An object containing default shipping details, including shipping service, fees, delivery times, and return policy.
+
+export const getStoreDefaultShippingDetails = async (storeUrl: string) => {
+    try {
+        //Ensure the store URL is provided
+        if (!storeUrl) throw new Error("Store URL is required.");
+
+        //Fetch the store and its default shipping details
+        const store = await db.store.findUnique({
+            where: {
+                url: storeUrl,
+            },
+            select: {
+                defaultShippingService: true,
+                defaultShippingFeePerItem: true,
+                defaultShippingFeeForAdditionalItem: true,
+                defaultShippingFeePerKg: true,
+                defaultShippingFeeFixed: true,
+                defaultDeliveryTimeMin: true,
+                defaultDeliveryTimeMax: true,
+                returnPolicy: true,
+            },
+        })
+
+        // Throw an error if the store is not found
+        if (!store) throw new Error("Store not found.");
+        return store;
+    } catch (error) {
+        //Log and re-throw any errors
+        console.log(error);
+        throw error;
+    }
+}
+
+//Function: updateStoreDefaultShippingDetails
+//Description: Updates the default shipping details for a store based on the store URL.
+//Parameters:
+// - storeUrl: The URL of the store to update.
+// - details: An object containing the new shipping details (shipping service, fees, delivery times, and return policy).
+//Returns: The updated store object with the new default shipping details.
+
+export const updateStoreDefaultShippingDetails = async (
+    storeUrl: string,
+    details: StoreDefaultShippingType
+) => {
+    try {
+        //Get current user
+        const user = await currentUser();
+
+        //Ensure user is authenticated
+        if (!user) throw new Error("Unauthenticated.");
+
+        //Verify seller permission
+        if (user.privateMetadata.role !== "SELLER")
+            throw new Error("Unauthorized Access: Seller Privileges Required for Entry.");
+
+        //Ensure store URL is provided
+        if (!storeUrl) throw new Error("Store URL is required.");
+
+        //Ensure at least one detail is provided for update
+        if (!details) {
+            throw new Error("No shipping details provided for update.");
+        }
+
+        //Make sure seller is updating their own store
+        const check_ownership = await db.store.findUnique({
+            where: {
+                url: storeUrl,
+                userId: user.id,
+            },
+        })
+
+        //Throw an error if the store is not found or not owned by the user
+        if (!check_ownership) throw new Error("Make sure you have the permissions to update this store");
+
+        //Find and update the store based on storeUrl
+        const updatedStore = await db.store.update({
+            where: {
+                url: storeUrl,
+                userId: user.id,
+            },
+            data: details,
+        })
+
+        return updatedStore;
     } catch (error) {
         //Log and re-throw any errors
         console.log(error);
