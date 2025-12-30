@@ -438,3 +438,20 @@ export const OfferTagFormSchema = z.object({
                 "Only letters, numbers, hyphen, and underscore are allowed in the category url, and consecutive occurrences of hyphens, underscores, or spaces are not permitted.",
         }),
 });
+
+//Store shipping details
+export const StoreShippingFormSchema = z.object({
+    defaultShippingService: z
+        .string({
+            required_error: "Shipping service name required.",
+        })
+        .min(2, { message: "Shipping service name must be at least 2 characters long." })
+        .max(50, { message: "Shipping service name cannot exceed 50 characters." }),
+    defaultShippingFeePerItem: z.number(),
+    defaultShippingFeeForAdditionalItem: z.number(),
+    defaultShippingFeePerKg: z.number(),
+    defaultShippingFeeFixed: z.number(),
+    defaultDeliveryTimeMin: z.number(),
+    defaultDeliveryTimeMax: z.number(),
+    returnPolicy: z.string(),
+})
