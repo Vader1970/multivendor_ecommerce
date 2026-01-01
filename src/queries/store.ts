@@ -7,10 +7,10 @@ import { db } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
 
 //Prisma Model
-import { StoreStatus } from "@prisma/client";
+import { ShippingRate, StoreStatus } from "@prisma/client";
 
 //Types
-import { StoreDefaultShippingType } from "@/lib/types";
+import { CountryWithShippingRatesType, StoreDefaultShippingType } from "@/lib/types";
 
 /**
  * Input type for upserting a store
@@ -223,3 +223,186 @@ export const updateStoreDefaultShippingDetails = async (
         throw error;
     }
 }
+
+/**
+ * Function: getStoreShippingRates
+ * Description: Retrieves all countries and their shipping rates for a specific store.
+ *              If a country does not have a shipping rate, it is still included in the result with a null shippingRate.
+ * Permission Level: Public
+ * Returns: Array of objects where each object contains a country and its associated shippingRate, sorted by country name.
+ */
+export const getStoreShippingRates = async (storeUrl: string) => {
+    try {
+        // Get current user
+        const user = await currentUser();
+
+        // Ensure user is authenticated
+        if (!user) throw new Error("Unauthenticated.");
+
+        // Verify seller permission
+        if (user.privateMetadata.role !== "SELLER")
+            throw new Error(
+                "Unauthorized Access: Seller Privileges Required for Entry."
+            );
+
+        // Ensure the store URL is provided
+        if (!storeUrl) throw new Error("Store URL is required.");
+
+        // Make sure seller is updating their own store
+        const check_ownership = await db.store.findUnique({
+            where: {
+                url: storeUrl,
+                userId: user.id,
+            },
+        });
+
+        if (!check_ownership)
+            throw new Error(
+                "Make sure you have the permissions to update this store"
+            );
+
+        // Get store details
+        const store = await db.store.findUnique({
+            where: { url: storeUrl, userId: user.id },
+        });
+
+        // If store is not found, throw an error
+        if (!store) throw new Error("Store could not be found.");
+
+        // Retrieve all countries
+        const countries = await db.country.findMany({
+            orderBy: {
+                name: "asc",
+            },
+        });
+
+        // Retrieve all shipping rates for the specified store
+        const shippingRates = await db.shippingRate.findMany({
+            where: {
+                storeId: store.id,
+            },
+        });
+
+        // Create a map for quick lookup of shipping rates by country ID
+        const rateMap = new Map();
+        shippingRates.forEach((rate) => {
+            rateMap.set(rate.countryId, rate);
+        });
+
+        // Map countries to their shipping rates
+        const result = countries.map((country) => ({
+            countryId: country.id,
+            countryName: country.name,
+            shippingRate: rateMap.get(country.id) || null,
+        }));
+
+        return result;
+    } catch (error) {
+        console.error("Error retrieving store shipping rates:", error);
+        throw error;
+    }
+};
+
+/**
+ * Input type for upserting a shipping rate
+ * Only includes fields that the client should control
+ */
+type UpsertShippingRateInput = {
+    id: string;
+    countryId: string;
+    shippingService: string;
+    shippingFeePerItem: number;
+    shippingFeeForAdditionalItem: number;
+    shippingFeePerKg: number;
+    shippingFeeFixed: number;
+    deliveryTimeMin: number;
+    deliveryTimeMax: number;
+    returnPolicy: string;
+};
+
+// Function: upsertShippingRate
+// Description: Upserts a shipping rate for a specific country, updating if it exists or creating a new one if not.
+// Permission Level: Seller only
+// Parameters:
+//   - storeUrl: Url of the store you are trying to update.
+//   - shippingRate: ShippingRate input object containing the details of the shipping rate to be upserted.
+// Returns: Updated or newly created shipping rate details.
+export const upsertShippingRate = async (
+    storeUrl: string,
+    shippingRate: UpsertShippingRateInput
+) => {
+    try {
+        // Get current user
+        const user = await currentUser();
+
+        // Ensure user is authenticated
+        if (!user) throw new Error("Unauthenticated.");
+
+        // Verify seller permission
+        if (user.privateMetadata.role !== "SELLER")
+            throw new Error(
+                "Unauthorized Access: Seller Privileges Required for Entry."
+            );
+
+        // Make sure seller is updating their own store
+        const check_ownership = await db.store.findUnique({
+            where: {
+                url: storeUrl,
+                userId: user.id,
+            },
+        });
+
+        if (!check_ownership)
+            throw new Error(
+                "Make sure you have the permissions to update this store"
+            );
+
+        // Ensure shipping rate data is provided
+        if (!shippingRate) throw new Error("Please provide shipping rate data.");
+
+        // Ensure countryId is provided
+        if (!shippingRate.countryId)
+            throw new Error("Please provide a valid country ID.");
+
+        // Get store id
+        const store = await db.store.findUnique({
+            where: {
+                url: storeUrl,
+                userId: user.id,
+            },
+        });
+        if (!store) throw new Error("Please provide a valid store URL.");
+
+        // Build the data object for update/create operations
+        const shippingRateData = {
+            shippingService: shippingRate.shippingService,
+            shippingFeePerItem: shippingRate.shippingFeePerItem,
+            shippingFeeForAdditionalItem: shippingRate.shippingFeeForAdditionalItem,
+            shippingFeePerKg: shippingRate.shippingFeePerKg,
+            shippingFeeFixed: shippingRate.shippingFeeFixed,
+            deliveryTimeMin: shippingRate.deliveryTimeMin,
+            deliveryTimeMax: shippingRate.deliveryTimeMax,
+            returnPolicy: shippingRate.returnPolicy,
+            countryId: shippingRate.countryId,
+            storeId: store.id,
+        };
+
+        // Upsert the shipping rate into the database
+        const shippingRateDetails = await db.shippingRate.upsert({
+            where: {
+                id: shippingRate.id,
+            },
+            update: shippingRateData,
+            create: {
+                id: shippingRate.id,
+                ...shippingRateData,
+            },
+        });
+
+        return shippingRateDetails;
+    } catch (error) {
+        // Log and re-throw any errors
+        console.log(error);
+        throw error;
+    }
+};
