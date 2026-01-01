@@ -28,8 +28,8 @@ import {
     DialogContent,
     DialogDescription,
     DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 /**
  * Props interface for CustomModal component
@@ -68,7 +68,7 @@ const CustomModal = ({ children, defaultOpen, subheading, heading }: Props) => {
          * - open: controlled by provider's isOpen state OR defaultOpen prop
          * - onOpenChange: called when user tries to close (click outside, ESC key)
          */
-        <Dialog open={isOpen || defaultOpen} onOpenChange={setClose}>
+        <Dialog open={isOpen ?? defaultOpen} onOpenChange={setClose}>
             {/* 
                 Dialog content container with responsive styling:
                 - overflow-y-scroll: enables vertical scrolling for long content
@@ -79,12 +79,14 @@ const CustomModal = ({ children, defaultOpen, subheading, heading }: Props) => {
             */}
             <DialogContent className="overflow-y-scroll md:max-h-[700px] md:h-fit h-screen bg-card w-[95vw] max-w-[95vw] sm:max-w-[1200px] sm:rounded-lg">
                 <DialogHeader className="pt-8 text-left">
-                    {/* Conditionally render heading if provided */}
-                    {heading && (
-                        <DialogTitle className="text-2xl font-bold">{heading}</DialogTitle>
-                    )}
-                    {/* Conditionally render subheading if provided */}
-                    {subheading && <DialogDescription>{subheading}</DialogDescription>}
+                    {/* Always render DialogTitle for accessibility, hide with sr-only if no heading */}
+                    <DialogTitle className={heading ? "text-2xl font-bold" : "sr-only"}>
+                        {heading || "Dialog"}
+                    </DialogTitle>
+                    {/* Always render DialogDescription for accessibility */}
+                    <DialogDescription className={subheading ? "" : "sr-only"}>
+                        {subheading || "Dialog content"}
+                    </DialogDescription>
 
                     {/* Main modal content (typically a form component) */}
                     {children}
