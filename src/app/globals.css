@@ -492,3 +492,9 @@
   border-color: #eeeeee2e !important;
   z-index: 50;
 }
+
+/* User Clerk Button */
+.user-avatar .cl-avatarBox {
+  width: 70px !important;
+  height: 70px !important;
+}
